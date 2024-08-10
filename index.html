@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typing Game</title>
+    <style>
+        body { 
+            font-family: 'Arial', sans-serif; 
+            text-align: center; 
+            margin: 0; 
+            padding: 0; 
+            background: url('https://via.placeholder.com/1920x1080') no-repeat center center fixed; 
+            background-size: cover; 
+            color: white; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh;
+        }
+        h1 { 
+            font-size: 3em; 
+            animation: fadeInDown 1s ease-out; 
+        }
+        h2 { 
+            font-size: 2.5em; 
+            margin: 20px 0; 
+            animation: pulse 1s infinite;
+        }
+        input { 
+            padding: 10px; 
+            font-size: 20px; 
+            border-radius: 5px; 
+            border: 2px solid #fff; 
+            animation: fadeInUp 1s ease-out;
+        }
+        select, button { 
+            padding: 10px; 
+            margin: 10px; 
+            font-size: 16px; 
+            border-radius: 5px; 
+            border: none; 
+            background: #fff; 
+            color: #333; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: background 0.3s, transform 0.3s;
+        }
+        select:hover, button:hover { 
+            background: #feb47b; 
+            transform: scale(1.05);
+        }
+        h3 { 
+            font-size: 1.5em; 
+            margin-top: 30px; 
+            animation: fadeIn 2s ease-out;
+        }
+        #timer {
+            font-size: 2em;
+            margin: 20px;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        #sword {
+            position: absolute;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 200px;
+            background: url('https://via.placeholder.com/200') no-repeat center center;
+            background-size: contain;
+            animation: none;
+            z-index: 10;
+        }
+        @keyframes slice {
+            from { top: -100px; }
+            to { top: 50%; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Typing Game</h1>
+    <label for="level">Select Level:</label>
+    <select id="level" onchange="changeLevel()">
+        <option value="easy">Easy</option>
+        <option value="hard">Hard</option>
+    </select>
+    <h2 id="word">Word</h2>
+    <input type="text" id="input" onkeyup="checkInput()" placeholder="Type the word here">
+    <h3>Score: <span id="score">0</span></h3>
+    <div id="timer">Time: <span id="time">7</span>s</div>
+    <button onclick="resetGame()">Reset Game</button>
+    <div id="sword"></div>
+
+    <script>
+        const words = {
+            easy: [
+                'Athiban', 'Thor', 'Jane', 'Naruto', 'Sasuke', 'Hinata', 'Sakura', 'Itachi', 
+                'Levi', 'Mikasa', 'Eren', 'Gohan', 'Vegeta', 'Bulma', 'Zoro', 'Nami', 'Chopper', 
+                'Inuyasha', 'Kagome', 'Saitama', 'Genos', 'Luffy', 'Sanji'
+            ],
+            hard: [
+                'ViratKohli', 'MSDhoni', 'SachinTendulkar', 'RickyPonting', 'BrianLara', 'ABDeVilliers', 
+                'KumarSangakkara', 'JacquesKallis', 'ShaneWarne', 'GlennMcGrath', 'RohitSharma', 
+                'DavidWarner', 'KaneWilliamson', 'BabarAzam', 'YuzvendraChahal', 'RashidKhan', 
+                'JofraArcher', 'MuttiahMuralitharan', 'SteveSmith', 'KagisoRabada'
+            ]
+        };
+
+        let level = 'easy';
+        let currentWord = '';
+        let score = 0;
+        let time = 7;
+        let timerInterval;
+
+        function changeLevel() {
+            level = document.getElementById('level').value;
+            resetGame();
+        }
+
+        function newWord() {
+            const wordList = words[level];
+            currentWord = wordList[Math.floor(Math.random() * wordList.length)];
+            document.getElementById('word').textContent = currentWord;
+        }
+
+        function startTimer() {
+            time = level === 'easy' ? 7 : 6;
+            document.getElementById('time').textContent = time;
+
+            timerInterval = setInterval(() => {
+                time--;
+                document.getElementById('time').textContent = time;
+                if (time <= 0) {
+                    gameOver();
+                }
+            }, 1000);
+        }
+
+        function checkInput() {
+            const input = document.getElementById('input').value;
+            if (input === currentWord) {
+                score++;
+                document.getElementById('score').textContent = score;
+                document.getElementById('input').value = '';
+                clearInterval(timerInterval);
+                newWord();
+                startTimer();
+            }
+        }
+
+        function resetGame() {
+            score = 0;
+            document.getElementById('score').textContent = score;
+            document.getElementById('input').value = '';
+            clearInterval(timerInterval);
+            newWord();
+            startTimer();
+            document.getElementById('sword').style.animation = 'none';
+        }
+
+        function gameOver() {
+            clearInterval(timerInterval);
+            document.getElementById('input').disabled = true;
+            document.getElementById('sword').style.animation = 'slice 1s ease-in-out forwards';
+            setTimeout(() => {
+                alert('Game Over! Your score: ' + score);
+                document.getElementById('input').disabled = false;
+                resetGame();
+            }, 1000);
+        }
+
+        window.onload = resetGame;
+    </script>
+</body>
+</html>
